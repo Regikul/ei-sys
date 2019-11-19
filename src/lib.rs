@@ -7,7 +7,7 @@
 
 use core::{ffi::c_void, ops};
 use in_addr;
-use libc::{c_char, c_int, c_long, c_longlong, c_short, c_uchar, c_uint, c_ulong, c_ulonglong};
+use libc::{c_char, c_int, c_long, c_longlong, c_short, c_uchar, c_uint, c_ulong, c_ulonglong, ssize_t};
 
 pub const ERL_TICK: c_int = 0;
 pub const ERL_MSG: c_int = 1;
@@ -203,6 +203,24 @@ pub struct ei_x_buff {
   pub index: c_int,
 }
 
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_socket_callbacks {
+  flags: c_int,
+  socket:  extern "C" fn (ctx: *mut *mut c_void, setup_ctx: *mut c_void),
+  close:   extern "C" fn (ctx: *mut c_void),
+  listen:  extern "C" fn (ctx: *mut c_void, addr: *mut c_void, len: *mut c_int, backlog: c_int),
+  accept:  extern "C" fn (ctx: *mut *mut c_void, addr: *mut c_void, len: *mut c_int, tmo: c_uint),
+  connect: extern "C" fn (ctx: *mut c_void, addr: *mut c_void, len: c_int, tmo: c_uint),
+  writev:  extern "C" fn (ctx: *mut c_void, iov: *const c_void, iovcnt: c_int, len: *mut ssize_t, tmo: c_uint),
+  write:   extern "C" fn (ctx: *mut c_void, buf: *const c_char, len: *mut ssize_t, tmo: c_uint),
+  read:    extern "C" fn (ctx: *mut c_void, buf: *mut c_char, len: *mut ssize_t, tmo: c_uint),
+  handshake_packet_header_size: extern "C" fn (ctx: *mut c_void, sz: *mut c_int),
+  connect_handshake_complete: extern "C" fn(ctx: *mut c_void),
+  accept_handshake_complete: extern "C" fn (ctx: *mut c_void),
+  get_fd:  extern "C" fn(ctx: *mut c_void, fd: *mut c_int),
+}
+
 extern "C" {
   /// The initial capacity of an [`ei_x_buff`] in bytes, when created with [`ei_x_new`].
   ///
@@ -212,6 +230,20 @@ extern "C" {
 
   /// Returns a pointer to the thread-local storage where `erl_errno` is stored.
   pub fn __erl_errno_place() -> *mut c_int;
+
+  pub fn ei_init() -> c_int;
+
+  pub fn ei_close_connection(fd: c_int) -> c_int;
+
+  pub fn ei_connect_init_ussi(
+    ec: *mut ei_cnode,
+    this_node_name: *const c_char,
+    cookie: *const c_char,
+    creation: c_short,
+    cbs: *mut ei_socket_callbacks,
+    cbs_sz: c_int,
+    setup_context: *mut c_void,
+  ) -> c_int;
 
   pub fn ei_connect_init(
     ec: *mut ei_cnode,
@@ -228,6 +260,19 @@ extern "C" {
     thisipaddr: *mut in_addr::in_addr,
     cookie: *const c_char,
     creation: c_short,
+  ) -> c_int;
+
+  pub fn ei_connect_xinit_ussi(
+    ec: *mut ei_cnode,
+    thishostname: *const c_char,
+    thisalivename: *const c_char,
+    thisnodename: *const c_char,
+    thisipaddr: *mut in_addr::in_addr,
+    cookie: *const c_char,
+    creation: c_short,
+    cbs: *mut ei_socket_callbacks,
+    cbs_sz: c_int,
+    setup_context: *mut c_void,
   ) -> c_int;
 
   pub fn ei_connect(ec: *mut ei_cnode, nodename: *mut c_char) -> c_int;
@@ -373,6 +418,10 @@ extern "C" {
     msg: *mut erlang_msg,
     x: *mut ei_x_buff,
   ) -> c_int;
+
+  pub fn ei_listen(ec: *mut ei_cnode, port: *mut c_int, backlog: c_int) -> c_int;
+
+  pub fn ei_xlisten(ec: *mut ei_cnode, addr: *mut in_addr::in_addr, port: *mut c_int, backlog: c_int) -> c_int;
 
   pub fn ei_publish(ec: *mut ei_cnode, port: c_int) -> c_int;
 

@@ -213,6 +213,8 @@ extern "C" {
   /// Returns a pointer to the thread-local storage where `erl_errno` is stored.
   pub fn __erl_errno_place() -> *mut c_int;
 
+  pub fn ei_init() -> c_int;
+
   pub fn ei_connect_init(
     ec: *mut ei_cnode,
     this_node_name: *const c_char,

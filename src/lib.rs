@@ -7,7 +7,7 @@
 
 use core::{ffi::c_void, ops};
 use in_addr;
-use libc::{c_char, c_int, c_long, c_longlong, c_short, c_uchar, c_uint, c_ulong, c_ulonglong, ssize_t};
+use libc::{c_char, c_int, c_long, c_longlong, c_short, c_uchar, c_uint, c_ulong, c_ulonglong, ssize_t, size_t};
 
 pub const ERL_TICK: c_int = 0;
 pub const ERL_MSG: c_int = 1;
@@ -630,6 +630,8 @@ extern "C" {
 
   pub fn ei_decode_map_header(buf: *const c_char, index: *mut c_int, arity: *mut c_int) -> c_int;
 
+  pub fn ei_decode_bitstring(buf: *const c_char, index: *mut c_int, pp: *const *const c_char, bitoffsp: *mut c_uint, nbitsp: *mut size_t) -> c_int;
+
   pub fn ei_print_term(fp: *mut libc::FILE, buf: *const c_char, index: *mut c_int) -> c_int;
 
   pub fn ei_s_print_term(s: *mut *mut c_char, buf: *const c_char, index: *mut c_int) -> c_int;
@@ -676,9 +678,13 @@ extern "C" {
 
   pub fn ei_encode_ulonglong(buf: *mut c_char, index: *mut c_int, p: c_ulonglong) -> c_int;
 
+  pub fn ei_encode_bitstring(buf: *mut c_char, index: *mut c_int, p: *const c_char, bitoffs: size_t, nbits: size_t) -> c_int;
+
   pub fn ei_x_encode_longlong(x: *mut ei_x_buff, n: c_longlong) -> c_int;
 
   pub fn ei_x_encode_ulonglong(x: *mut ei_x_buff, n: c_ulonglong) -> c_int;
+
+  pub fn ei_x_encode_bitstring(x: *mut ei_x_buff, p: *const c_char, bitoffs: size_t, nbits: size_t) -> c_int;
 
   pub fn ei_receive_encoded(
     fd: c_int,

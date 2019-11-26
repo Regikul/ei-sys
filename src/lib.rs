@@ -72,21 +72,23 @@ pub const ERL_NIL_EXT: u8 = b'j';
 pub const ERL_STRING_EXT: u8 = b'k';
 pub const ERL_LIST_EXT: u8 = b'l';
 pub const ERL_BINARY_EXT: u8 = b'm';
+pub const ERL_BIT_BINARY_EXT: u8 = b'M';
 pub const ERL_SMALL_BIG_EXT: u8 = b'n';
 pub const ERL_LARGE_BIG_EXT: u8 = b'o';
 pub const ERL_NEW_FUN_EXT: u8 = b'p';
 pub const ERL_MAP_EXT: u8 = b't';
 pub const ERL_FUN_EXT: u8 = b'u';
+pub const ERL_EXPORT_EXT: u8 = b'q';
 
 pub const ERL_NEW_CACHE: u8 = b'N';
 pub const ERL_CACHED_ATOM: u8 = b'C';
 
-pub const EI_MAXHOSTNAMELEN: usize = 64;
-pub const EI_MAXALIVELEN: usize = 63;
 pub const EI_MAX_COOKIE_SIZE: usize = 512;
 pub const MAXATOMLEN: usize = 255 + 1;
 pub const MAXATOMLEN_UTF8: usize = 255 * 4 + 1;
-pub const MAXNODELEN: usize = EI_MAXALIVELEN + 1 + EI_MAXHOSTNAMELEN;
+pub const EI_MAXHOSTNAMELEN: usize = MAXATOMLEN - 2;
+pub const EI_MAXALIVELEN: usize = MAXATOMLEN - 2;
+pub const MAXNODELEN: usize = MAXATOMLEN;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -176,19 +178,46 @@ pub struct erlang_msg {
 }
 
 #[repr(C)]
+#[derive(Copy, Clone)]
+pub struct temp_clos {
+  md5: [c_char; 16],
+  index: c_long,
+  old_index: c_long,
+  uniq: c_long,
+  n_free_vars: c_long,
+  pid: erlang_pid,
+  free_var_len: c_long,
+  free_vars: *mut c_char,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct temp_exprt {
+  pub func: *mut c_char,
+  pub func_allocated: c_int,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union fun_union {
+  closure: temp_clos,
+  exprt: temp_exprt
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub enum fun_type {
+  EI_FUN_CLOSURE,
+  EI_FUN_EXPORT,
+}
+
+#[repr(C)]
 #[derive(Clone)]
 pub struct erlang_fun {
   pub arity: c_long,
   pub module: [c_char; MAXATOMLEN_UTF8],
-  pub module_org_enc: erlang_char_encoding,
-  pub md5: [c_char; 16],
-  pub index: c_long,
-  pub old_index: c_long,
-  pub uniq: c_long,
-  pub n_free_vars: c_long,
-  pub pid: erlang_pid,
-  pub free_var_len: c_long,
-  pub free_vars: *mut c_char,
+  pub type_: fun_type,
+  pub u: fun_union,
 }
 
 #[repr(C)]
@@ -664,7 +693,22 @@ extern "C" {
     len: c_long,
   ) -> c_int;
 
+  pub fn ei_encode_bitstring(
+    buf: *mut c_char,
+    index: *mut c_int,
+    p: *const c_char,
+    bitoffs: ssize_t,
+    bits: ssize_t
+  ) -> c_int;
+
   pub fn ei_x_encode_binary(x: *mut ei_x_buff, s: *const c_void, len: c_int) -> c_int;
+
+  pub fn ei_x_encode_bitstring(
+    x: *mut ei_x_buff,
+    p: *const c_char,
+    bitoffs: ssize_t,
+    bits: ssize_t
+  ) -> c_int;
 
   pub fn ei_encode_pid(buf: *mut c_char, index: *mut c_int, p: *const erlang_pid) -> c_int;
 
@@ -682,8 +726,10 @@ extern "C" {
 
   pub fn ei_x_encode_ref(x: *mut ei_x_buff, p: *const erlang_ref) -> c_int;
 
+  #[deprecated]
   pub fn ei_encode_term(buf: *mut c_char, index: *mut c_int, t: *mut c_void) -> c_int;
 
+  #[deprecated]
   pub fn ei_x_encode_term(x: *mut ei_x_buff, t: *mut c_void) -> c_int;
 
   pub fn ei_encode_trace(buf: *mut c_char, index: *mut c_int, p: *const erlang_trace) -> c_int;
@@ -744,6 +790,14 @@ extern "C" {
     len: *mut c_long,
   ) -> c_int;
 
+  pub fn ei_decode_bitstring(
+    buf: *const c_char,
+    index: *mut c_int,
+    pp: *mut *mut c_char,
+    bitoffsp: *mut c_uint,
+    nbitsp: *mut ssize_t
+  ) -> c_int;
+
   pub fn ei_decode_fun(buf: *const c_char, index: *mut c_int, p: *mut erlang_fun) -> c_int;
 
   pub fn free_fun(f: *mut erlang_fun);
@@ -754,6 +808,7 @@ extern "C" {
 
   pub fn ei_decode_ref(buf: *const c_char, index: *mut c_int, p: *mut erlang_ref) -> c_int;
 
+  #[deprecated]
   pub fn ei_decode_term(buf: *const c_char, index: *mut c_int, t: *mut c_void) -> c_int;
 
   pub fn ei_decode_trace(buf: *const c_char, index: *mut c_int, p: *mut erlang_trace) -> c_int;

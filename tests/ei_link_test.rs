@@ -7,6 +7,7 @@ fn ei_decode_ok() {
     x = ei_sys::ei_decode_atom          as *const ();
     x = ei_sys::ei_decode_atom_as       as *const ();
     x = ei_sys::ei_decode_binary        as *const ();
+    x = ei_sys::ei_decode_bitstring     as *const ();
     x = ei_sys::ei_decode_boolean       as *const ();
     x = ei_sys::ei_decode_char          as *const ();
     x = ei_sys::ei_decode_double        as *const ();
@@ -20,7 +21,7 @@ fn ei_decode_ok() {
     x = ei_sys::ei_decode_port          as *const ();
     x = ei_sys::ei_decode_ref           as *const ();
     x = ei_sys::ei_decode_string        as *const ();
-    // x = ei_sys::ei_decode_term       as *const (); // b/c of undefined reference
+    // x = ei_sys::ei_decode_term          as *const (); // b/c of undefined reference
     x = ei_sys::ei_decode_trace         as *const ();
     x = ei_sys::ei_decode_tuple_header  as *const ();
     x = ei_sys::ei_decode_ulong         as *const ();
@@ -37,6 +38,7 @@ fn ei_encode_ok() {
     x = ei_sys::ei_encode_atom_len      as *const ();
     x = ei_sys::ei_encode_atom_len_as   as *const ();
     x = ei_sys::ei_encode_binary        as *const ();
+    x = ei_sys::ei_encode_bitstring     as *const ();
     x = ei_sys::ei_encode_boolean       as *const ();
     x = ei_sys::ei_encode_char          as *const ();
     x = ei_sys::ei_encode_double        as *const ();
@@ -51,7 +53,7 @@ fn ei_encode_ok() {
     x = ei_sys::ei_encode_ref           as *const ();
     x = ei_sys::ei_encode_string        as *const ();
     x = ei_sys::ei_encode_string_len    as *const ();
-    // x = ei_sys::ei_encode_term       as *const (); // b/c of undefined reference
+    // x = ei_sys::ei_encode_term          as *const (); // b/c of undefined reference
     x = ei_sys::ei_encode_trace         as *const ();
     x = ei_sys::ei_encode_tuple_header  as *const ();
     x = ei_sys::ei_encode_ulong         as *const ();
@@ -63,6 +65,7 @@ fn ei_encode_ok() {
     x = ei_sys::ei_x_encode_atom_len      as *const ();
     x = ei_sys::ei_x_encode_atom_len_as   as *const ();
     x = ei_sys::ei_x_encode_binary        as *const ();
+    x = ei_sys::ei_x_encode_bitstring     as *const ();
     x = ei_sys::ei_x_encode_boolean       as *const ();
     x = ei_sys::ei_x_encode_char          as *const ();
     x = ei_sys::ei_x_encode_double        as *const ();
@@ -77,7 +80,7 @@ fn ei_encode_ok() {
     x = ei_sys::ei_x_encode_ref           as *const ();
     x = ei_sys::ei_x_encode_string        as *const ();
     x = ei_sys::ei_x_encode_string_len    as *const ();
-    // x = ei_sys::ei_x_encode_term       as *const (); // b/c of undefined reference
+    // x = ei_sys::ei_x_encode_term          as *const (); // b/c of undefined reference
     x = ei_sys::ei_x_encode_trace         as *const ();
     x = ei_sys::ei_x_encode_tuple_header  as *const ();
     x = ei_sys::ei_x_encode_ulong         as *const ();

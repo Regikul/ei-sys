@@ -7,16 +7,30 @@
 
 use core::{ffi::c_void, ops};
 use in_addr;
-use libc::{c_char, c_int, c_long, c_longlong, c_short, c_uchar, c_uint, c_ulong, c_ulonglong};
+use libc::{
+  c_char,
+  c_uchar,
+  c_int,
+  c_uint,
+  c_long,
+  c_ulong,
+  c_longlong,
+  c_short,
+  c_ulonglong,
+  c_double,
+};
 
-pub const ERL_TICK: c_int = 0;
-pub const ERL_MSG: c_int = 1;
 pub const ERL_ERROR: c_int = -1;
 pub const ERL_NO_DAEMON: c_int = -2;
 pub const ERL_NO_PORT: c_int = -3;
 pub const ERL_CONNECT_FAIL: c_int = -4;
 pub const ERL_TIMEOUT: c_int = -5;
 pub const ERL_NO_REMOTE: c_int = -6;
+
+pub const ERL_TICK: c_int = 0;
+pub const ERL_MSG: c_int = 1;
+
+pub const ERL_NO_TIMEOUT: c_int = -1;
 
 pub const ERL_LINK: u8 = 1;
 pub const ERL_SEND: u8 = 2;
@@ -28,51 +42,47 @@ pub const ERL_GROUP_LEADER: u8 = 7;
 pub const ERL_EXIT2: u8 = 8;
 pub const ERL_PASS_THROUGH: u8 = b'p';
 
+pub const ERL_SEND_TT: u8 = 12;
+pub const ERL_EXIT_TT: u8 = 13;
+pub const ERL_REG_SEND_TT: u8 = 16;
+pub const ERL_EXIT2_TT: u8 = 18;
+pub const ERL_MONITOR_P: u8 = 19;
+pub const ERL_DEMONITOR_P: u8 = 20;
+pub const ERL_MONITOR_P_EXIT: u8 = 21;
+
+pub const ERL_SMALL_INTEGER_EXT: u8 = b'a';
+pub const ERL_INTEGER_EXT: u8 = b'b';
+pub const ERL_FLOAT_EXT: u8 = b'c';
+pub const NEW_FLOAT_EXT: u8 = b'F';
+pub const ERL_ATOM_EXT: u8 = b'd';
+pub const ERL_SMALL_ATOM_EXT: u8 = b's';
+pub const ERL_ATOM_UTF8_EXT: u8 = b'v';
+pub const ERL_SMALL_ATOM_UTF8_EXT: u8 = b'w';
+pub const ERL_REFERENCE_EXT: u8 = b'e';
+pub const ERL_NEW_REFERENCE_EXT: u8 = b'r';
+pub const ERL_PORT_EXT: u8 = b'f';
+pub const ERL_PID_EXT: u8 = b'g';
+pub const ERL_SMALL_TUPLE_EXT: u8 = b'h';
+pub const ERL_LARGE_TUPLE_EXT: u8 = b'i';
+pub const ERL_NIL_EXT: u8 = b'j';
+pub const ERL_STRING_EXT: u8 = b'k';
+pub const ERL_LIST_EXT: u8 = b'l';
+pub const ERL_BINARY_EXT: u8 = b'm';
+pub const ERL_SMALL_BIG_EXT: u8 = b'n';
+pub const ERL_LARGE_BIG_EXT: u8 = b'o';
+pub const ERL_NEW_FUN_EXT: u8 = b'p';
+pub const ERL_MAP_EXT: u8 = b't';
+pub const ERL_FUN_EXT: u8 = b'u';
+
+pub const ERL_NEW_CACHE: u8 = b'N';
+pub const ERL_CACHED_ATOM: u8 = b'C';
+
 pub const EI_MAXHOSTNAMELEN: usize = 64;
 pub const EI_MAXALIVELEN: usize = 63;
 pub const EI_MAX_COOKIE_SIZE: usize = 512;
 pub const MAXATOMLEN: usize = 255 + 1;
 pub const MAXATOMLEN_UTF8: usize = 255 * 4 + 1;
 pub const MAXNODELEN: usize = EI_MAXALIVELEN + 1 + EI_MAXHOSTNAMELEN;
-
-pub const SMALL_INTEGER_EXT: u8 = b'a';
-pub const INTEGER_EXT: u8 = b'b';
-pub const FLOAT_EXT: u8 = b'c';
-pub const ATOM_EXT: u8 = b'd';
-pub const SMALL_ATOM_EXT: u8 = b's';
-pub const REFERENCE_EXT: u8 = b'e';
-pub const NEW_REFERENCE_EXT: u8 = b'r';
-pub const NEWER_REFERENCE_EXT: u8 = b'Z';
-pub const PORT_EXT: u8 = b'f';
-pub const NEW_PORT_EXT: u8 = b'Y';
-pub const NEW_FLOAT_EXT: u8 = b'F';
-pub const PID_EXT: u8 = b'g';
-pub const NEW_PID_EXT: u8 = b'X';
-pub const SMALL_TUPLE_EXT: u8 = b'h';
-pub const LARGE_TUPLE_EXT: u8 = b'i';
-pub const NIL_EXT: u8 = b'j';
-pub const STRING_EXT: u8 = b'k';
-pub const LIST_EXT: u8 = b'l';
-pub const BINARY_EXT: u8 = b'm';
-pub const BIT_BINARY_EXT: u8 = b'M';
-pub const SMALL_BIG_EXT: u8 = b'n';
-pub const LARGE_BIG_EXT: u8 = b'o';
-pub const NEW_FUN_EXT: u8 = b'p';
-pub const EXPORT_EXT: u8 = b'q';
-pub const MAP_EXT: u8 = b't';
-pub const FUN_EXT: u8 = b'u';
-pub const ATOM_UTF8_EXT: u8 = b'v';
-pub const SMALL_ATOM_UTF8_EXT: u8 = b'w';
-
-pub const DIST_HEADER: u8 = b'D';
-pub const ATOM_CACHE_REF: u8 = b'R';
-pub const ATOM_INTERNAL_REF2: u8 = b'I';
-pub const ATOM_INTERNAL_REF3: u8 = b'K';
-pub const BINARY_INTERNAL_REF: u8 = b'J';
-pub const BIT_BINARY_INTERNAL_REF: u8 = b'L';
-pub const COMPRESSED: u8 = b'P';
-
-pub const VERSION_MAGIC: u8 = 131;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -115,7 +125,7 @@ impl ops::BitAndAssign for erlang_char_encoding {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct erlang_pid {
   pub node: [c_char; MAXATOMLEN_UTF8],
   pub num: c_uint,
@@ -124,7 +134,7 @@ pub struct erlang_pid {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct erlang_port {
   pub node: [c_char; MAXATOMLEN_UTF8],
   pub id: c_uint,
@@ -132,7 +142,7 @@ pub struct erlang_port {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct erlang_ref {
   pub node: [c_char; MAXATOMLEN_UTF8],
   pub len: c_int,
@@ -179,6 +189,34 @@ pub struct erlang_fun {
 
 #[repr(C)]
 #[derive(Clone)]
+pub struct erlang_big {
+  pub arity: c_uint,
+  pub is_neg: c_int,
+  pub digits: *mut c_void,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union term_value {
+  pub i_val: c_long,
+  pub d_val: c_double,
+  pub atom_name: [c_char; MAXATOMLEN_UTF8],
+  pid: erlang_pid,
+  port: erlang_port,
+  ref_: erlang_ref,
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_term {
+  pub ie_type: c_char,
+  pub arity: c_int,
+  pub size: c_int,
+  pub value: term_value
+}
+
+#[repr(C)]
+#[derive(Clone)]
 pub struct ErlConnect {
   pub ipadr: [c_char; 4],
   pub nodename: [c_char; MAXNODELEN + 1],
@@ -195,6 +233,8 @@ pub struct ei_cnode {
   pub self_: erlang_pid,
 }
 
+type Erl_IpAddr = in_addr::in_addr;
+
 #[repr(C)]
 #[derive(Clone)]
 pub struct ei_x_buff {
@@ -202,6 +242,84 @@ pub struct ei_x_buff {
   pub buffsz: c_int,
   pub index: c_int,
 }
+
+pub unsafe fn ei_encode_empty_list(buf: *mut c_char, i: *mut c_int) -> c_int {
+    ei_encode_list_header(buf, i, 0)
+}
+
+pub const EI_SMALLKEY: usize = 32;
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_bucket {
+  pub rawhash: c_int,
+  pub key: *const c_char,
+  pub keybuf: [c_char; EI_SMALLKEY],
+  pub value: *const c_void,
+  pub next: *mut ei_bucket,
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_hash {
+  pub tab: *mut *mut ei_bucket,
+  pub hash: extern "C" fn (buf: *const c_char) -> c_int,
+  pub size: c_int,
+  pub nelem: c_int,
+  pub npos: c_int,
+  pub freelist: *mut ei_bucket,
+}
+
+pub const EI_DIRTY: u32 = 0x01;
+pub const EI_DELET: u32 = 0x02;
+pub const EI_INT: u32 = 0x10;
+pub const EI_FLT: u32 = 0x20;
+pub const EI_STR: u32 = 0x40;
+pub const EI_BIN: u32 = 0x80;
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union ei_val {
+  pub i: c_long,
+  pub f: c_double,
+  pub s: *mut c_char,
+  pub p: *mut c_void,
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_reg_obj {
+  pub attr: c_int,
+  pub size: c_int,
+  pub val: ei_val,
+  pub next: *mut ei_reg_obj,
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_reg {
+  pub freelist: *mut ei_reg_obj,
+  pub tab: *mut ei_hash,
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_reg_stat {
+  pub attr: c_int,
+  pub size: c_int,
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_reg_tabstat {
+  pub size: c_int,
+  pub nelem: c_int,
+  pub npos: c_int,
+  pub collisions: c_int,
+}
+
+pub const EI_FORCE: u32 = 0x1;
+pub const EI_NOPURGE: u32 = 0x2;
 
 extern "C" {
   /// The initial capacity of an [`ei_x_buff`] in bytes, when created with [`ei_x_new`].
@@ -225,7 +343,7 @@ extern "C" {
     thishostname: *const c_char,
     thisalivename: *const c_char,
     thisnodename: *const c_char,
-    thisipaddr: *mut in_addr::in_addr,
+    thisipaddr: *mut Erl_IpAddr,
     cookie: *const c_char,
     creation: c_short,
   ) -> c_int;
@@ -246,7 +364,7 @@ extern "C" {
   /// [The official entry for this function in the Erlang documentation.](http://erlang.org/doc/man/ei_connect.html#ei_xconnect)
   pub fn ei_xconnect(
     node: *mut ei_cnode,
-    remote_host: *mut in_addr::in_addr,
+    remote_host: *mut Erl_IpAddr,
     remote_name: *mut c_char,
   ) -> c_int;
 
@@ -274,7 +392,7 @@ extern "C" {
   /// [The official entry for this function in the Erlang documentation.](http://erlang.org/doc/man/ei_connect.html#ei_xconnect_tmo)
   pub fn ei_xconnect_tmo(
     node: *mut ei_cnode,
-    remote_host: *mut in_addr::in_addr,
+    remote_host: *mut Erl_IpAddr,
     remote_name: *mut c_char,
     ms: c_uint,
   ) -> c_int;
@@ -381,6 +499,10 @@ extern "C" {
   pub fn ei_accept(ec: *mut ei_cnode, lfd: c_int, conp: *mut ErlConnect) -> c_int;
 
   pub fn ei_accept_tmo(ec: *mut ei_cnode, lfd: c_int, conp: *mut ErlConnect, ms: c_uint) -> c_int;
+
+  pub fn ei_unpublish(ec: *mut ei_cnode);
+
+  pub fn ei_unpublish_tmo(alive: *const c_char, ms: c_uint);
 
   pub fn ei_thisnodename(ec: *const ei_cnode) -> *const c_char;
 
@@ -503,6 +625,10 @@ extern "C" {
 
   pub fn ei_x_encode_ref(x: *mut ei_x_buff, p: *const erlang_ref) -> c_int;
 
+  pub fn ei_encode_term(buf: *mut c_char, index: *mut c_int, t: *mut c_void) -> c_int;
+
+  pub fn ei_x_encode_term(x: *mut ei_x_buff, t: *mut c_void) -> c_int;
+
   pub fn ei_encode_trace(buf: *mut c_char, index: *mut c_int, p: *const erlang_trace) -> c_int;
 
   pub fn ei_x_encode_trace(x: *mut ei_x_buff, p: *const erlang_trace) -> c_int;
@@ -619,6 +745,46 @@ extern "C" {
 
   pub fn ei_skip_term(buf: *const c_char, index: *mut c_int) -> c_int;
 
+  pub fn ei_reg_open(size: c_int) -> *mut ei_reg;
+
+  pub fn ei_reg_resize(oldreg: *mut ei_reg, newsize: c_int) -> c_int;
+
+  pub fn ei_reg_close(reg: *mut ei_reg) -> c_int;
+
+  pub fn ei_reg_setival(reg: *mut ei_reg, key: *const c_char, i: c_long) -> c_int;
+
+  pub fn ei_reg_setfval(reg: *mut ei_reg, key: *const c_char, f: c_double) -> c_int;
+
+  pub fn ei_reg_setsval(reg: *mut ei_reg, key: *const c_char, s: *const c_char) -> c_int;
+
+  pub fn ei_reg_setpval(reg: *mut ei_reg, key: *const c_char, p: *const c_void, size: c_int) -> c_int;
+
+  pub fn ei_reg_setval(reg: *mut ei_reg, key: *const c_char, flags: c_int, ...) -> c_int;
+
+  pub fn ei_reg_getival(reg: *mut ei_reg, key: *const c_char ) -> c_long;
+
+  pub fn ei_reg_getfval(reg: *mut ei_reg, key: *const c_char ) -> c_double;
+
+  pub fn ei_reg_getsval(reg: *mut ei_reg, key: *const c_char ) -> *const c_char;
+
+  pub fn ei_reg_getpval(reg: *mut ei_reg, key: *const c_char, size: *mut c_int) -> *const c_void;
+
+  pub fn ei_reg_getval(reg: *mut ei_reg, key: *const c_char, flags: c_int, ...) -> c_int;
+
+  pub fn ei_reg_markdirty(reg: *mut ei_reg, key: *const c_char) -> c_int;
+
+  pub fn ei_reg_delete(reg: *mut ei_reg, key: *const c_char) -> c_int;
+
+  pub fn ei_reg_stat(reg: *mut ei_reg, key: *const c_char, obuf: *mut ei_reg_stat) -> c_int;
+
+  pub fn ei_reg_tabstat(reg: *mut ei_reg, obuf: *mut ei_reg_stat) -> c_int;
+
+  pub fn ei_reg_dump(fd: c_int, reg: *mut ei_reg, mntab: *const c_char, flags: c_int) -> c_int;
+
+  pub fn ei_reg_restore(fd: c_int, reg: *mut ei_reg, mntab: *const c_char) -> c_int;
+
+  pub fn ei_reg_purge(reg: *mut ei_reg) -> c_int;
+
   pub fn ei_decode_longlong(buf: *const c_char, index: *mut c_int, p: *mut c_longlong) -> c_int;
 
   pub fn ei_decode_ulonglong(buf: *const c_char, index: *mut c_int, p: *mut c_ulonglong) -> c_int;
@@ -679,4 +845,21 @@ extern "C" {
     msglen: c_int,
     ms: c_uint,
   ) -> c_int;
+
+  pub fn ei_encode_big(buf: *mut c_char, index: *mut c_int, big: *mut erlang_big) -> c_int;
+
+  pub fn ei_x_encode_big(x: *mut ei_x_buff, big: *mut erlang_big) -> c_int;
+
+  pub fn ei_decode_big(buf: *const c_char, index: *mut c_int, p: *mut erlang_big) -> c_int;
+
+  pub fn ei_big_comp(x: *mut erlang_big, y: *mut erlang_big) -> c_int;
+
+  pub fn ei_big_to_double(b: *mut erlang_big, resp: *mut c_double) -> c_int;
+
+  pub fn ei_small_to_big(s: c_int, b: *mut erlang_big) -> c_int;
+
+  pub fn ei_alloc_big(arity: c_uint) -> *mut erlang_big;
+
+  pub fn ei_free_big(b: *mut erlang_big) -> c_void;
+
 }

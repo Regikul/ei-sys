@@ -26,7 +26,6 @@ fn ei_decode_ok() {
     x = ei_sys::ei_decode_ulong         as *const ();
     x = ei_sys::ei_decode_ulonglong     as *const ();
     x = ei_sys::ei_decode_version       as *const ();
-    x = ei_sys::ei_decode_ei_term       as *const ();
 }
 
 #[allow(unused_assignments, unused_variables)]

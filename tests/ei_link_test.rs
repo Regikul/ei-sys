@@ -89,6 +89,7 @@ fn ei_encode_ok() {
 #[test]
 fn ei_other_ok() {
     let mut x = 0 as *const ();
+    x = ei_sys::ei_init                 as *const ();
     x = ei_sys::free_fun                as *const ();
     x = ei_sys::ei_get_type             as *const ();
     x = ei_sys::ei_print_term           as *const ();
@@ -114,10 +115,14 @@ fn ei_connect_ok() {
     x = ei_sys::ei_xconnect             as *const ();
     x = ei_sys::ei_xconnect_tmo         as *const ();
     x = ei_sys::ei_connect_init         as *const ();
+    x = ei_sys::ei_connect_init_ussi    as *const ();
     x = ei_sys::ei_connect_xinit        as *const ();
+    x = ei_sys::ei_connect_xinit_ussi   as *const ();
     x = ei_sys::ei_get_tracelevel       as *const ();
     x = ei_sys::ei_publish              as *const ();
     x = ei_sys::ei_publish_tmo          as *const ();
+    x = ei_sys::ei_listen               as *const ();
+    x = ei_sys::ei_xlisten              as *const ();
     x = ei_sys::ei_receive              as *const ();
     x = ei_sys::ei_receive_encoded      as *const ();
     x = ei_sys::ei_receive_encoded_tmo  as *const ();
@@ -142,6 +147,7 @@ fn ei_connect_ok() {
     x = ei_sys::ei_thisnodename         as *const ();
     x = ei_sys::ei_unpublish            as *const ();
     x = ei_sys::ei_unpublish_tmo        as *const ();
+    x = ei_sys::ei_close_connection     as *const ();
     x = ei_sys::ei_xreceive_msg         as *const ();
     x = ei_sys::ei_xreceive_msg_tmo     as *const ();
 }

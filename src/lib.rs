@@ -18,6 +18,7 @@ use libc::{
   c_short,
   c_ulonglong,
   c_double,
+  ssize_t,
 };
 
 pub const ERL_ERROR: c_int = -1;
@@ -60,8 +61,11 @@ pub const ERL_ATOM_UTF8_EXT: u8 = b'v';
 pub const ERL_SMALL_ATOM_UTF8_EXT: u8 = b'w';
 pub const ERL_REFERENCE_EXT: u8 = b'e';
 pub const ERL_NEW_REFERENCE_EXT: u8 = b'r';
+pub const ERL_NEWER_REFERENCE_EXT: u8 = b'Z';
 pub const ERL_PORT_EXT: u8 = b'f';
+pub const ERL_NEW_PORT_EXT: u8 = b'Y';
 pub const ERL_PID_EXT: u8 = b'g';
+pub const ERL_NEW_PID_EXT: u8 = b'X';
 pub const ERL_SMALL_TUPLE_EXT: u8 = b'h';
 pub const ERL_LARGE_TUPLE_EXT: u8 = b'i';
 pub const ERL_NIL_EXT: u8 = b'j';
@@ -222,6 +226,28 @@ pub struct ErlConnect {
   pub nodename: [c_char; MAXNODELEN + 1],
 }
 
+pub const EI_SCLBK_INF_TMO: u32 = !0;
+pub const EI_SCLBK_FLG_FULL_IMPL: u32 = 1 << 0;
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct ei_socket_callbacks{
+  pub flags: c_int,
+  pub socket: extern "C" fn (ctx: *mut *mut c_void, setup_ctx: *mut c_void),
+  pub close: extern "C" fn (ctx: *mut c_void),
+  pub listen: extern "C" fn (ctx: *mut c_void, addr: *mut c_void, len: *mut c_int),
+  pub accept: extern "C" fn (ctx: *mut *mut c_void, addr: *mut c_void, len: *mut c_int, tmo: c_uint),
+  pub connect: extern "C" fn (ctx: *mut c_void, addr: *mut c_void, len: *mut c_int, tmo: c_uint),
+  pub writev: extern "C" fn (ctx: *mut c_void, iov: *const c_void, iovcnt: c_int, len: *mut ssize_t, tmo: c_uint),
+  pub write: extern "C" fn (ctx: *mut c_void, buf: *const c_char, len: *mut ssize_t, tmo: c_uint),
+  pub read: extern "C" fn (ctx: *mut c_void, buf: *mut c_char, len: *mut ssize_t, tmo: c_uint),
+
+  pub handshake_packet_header_size: extern "C" fn (ctx: *mut c_void, sz: *mut c_int),
+  pub connect_handshake_complete: extern "C" fn (ctx: *mut c_void),
+  pub accept_handshake_complete: extern "C" fn (ctx: *mut c_void),
+  pub get_fd: extern "C" fn (ctx: *mut c_void, fd: *mut c_int),
+}
+
 #[repr(C)]
 #[derive(Clone)]
 pub struct ei_cnode {
@@ -231,6 +257,8 @@ pub struct ei_cnode {
   pub ei_connect_cookie: [c_char; EI_MAX_COOKIE_SIZE + 1],
   pub creation: c_short,
   pub self_: erlang_pid,
+  pub cbs: *mut ei_socket_callbacks,
+  pub setup_context: *mut c_void,
 }
 
 type Erl_IpAddr = in_addr::in_addr;
@@ -346,6 +374,29 @@ extern "C" {
     thisipaddr: *mut Erl_IpAddr,
     cookie: *const c_char,
     creation: c_short,
+  ) -> c_int;
+
+  pub fn ei_connect_init_ussi(
+    ec: *mut ei_cnode,
+    this_node_name: *const c_char,
+    cookie: *const c_char,
+    creation: c_short,
+    cbs: *mut ei_socket_callbacks,
+    cbs_sz: c_int,
+    setup_context: *mut c_void,
+  ) -> c_int;
+
+  pub fn ei_connect_xinit_ussi(
+    ec: *mut ei_cnode,
+    thishostname: *const c_char,
+    thisalivename: *const c_char,
+    thisnodename: *const c_char,
+    thisipaddr: *mut Erl_IpAddr,
+    cookie: *const c_char,
+    creation: c_short,
+    cbs: *mut ei_socket_callbacks,
+    cbs_sz: c_int,
+    setup_context: *mut c_void,
   ) -> c_int;
 
   pub fn ei_connect(ec: *mut ei_cnode, nodename: *mut c_char) -> c_int;
@@ -496,6 +547,10 @@ extern "C" {
 
   pub fn ei_publish_tmo(ec: *mut ei_cnode, port: c_int, ms: c_uint) -> c_int;
 
+  pub fn ei_listen(ec: *mut ei_cnode, port: *mut c_int, backlog: c_int) -> c_int;
+
+  pub fn ei_xlisten(ec: *mut ei_cnode, adr: Erl_IpAddr, port: *mut c_int, backlog: c_int) -> c_int;
+
   pub fn ei_accept(ec: *mut ei_cnode, lfd: c_int, conp: *mut ErlConnect) -> c_int;
 
   pub fn ei_accept_tmo(ec: *mut ei_cnode, lfd: c_int, conp: *mut ErlConnect, ms: c_uint) -> c_int;
@@ -503,6 +558,8 @@ extern "C" {
   pub fn ei_unpublish(ec: *mut ei_cnode);
 
   pub fn ei_unpublish_tmo(alive: *const c_char, ms: c_uint);
+
+  pub fn ei_close_connection(fd: c_int) -> c_int;
 
   pub fn ei_thisnodename(ec: *const ei_cnode) -> *const c_char;
 
@@ -746,6 +803,8 @@ extern "C" {
   pub fn ei_x_append_buf(x: *mut ei_x_buff, buf: *const c_char, len: c_int) -> c_int;
 
   pub fn ei_skip_term(buf: *const c_char, index: *mut c_int) -> c_int;
+
+  pub fn ei_init() -> c_int;
 
   pub fn ei_reg_open(size: c_int) -> *mut ei_reg;
 

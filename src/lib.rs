@@ -707,6 +707,8 @@ extern "C" {
 
   pub fn ei_decode_map_header(buf: *const c_char, index: *mut c_int, arity: *mut c_int) -> c_int;
 
+  pub fn ei_decode_ei_term(buf: *const c_char, index: *mut c_int, term: *mut ei_term) -> c_int;
+
   pub fn ei_print_term(fp: *mut libc::FILE, buf: *const c_char, index: *mut c_int) -> c_int;
 
   pub fn ei_s_print_term(s: *mut *mut c_char, buf: *const c_char, index: *mut c_int) -> c_int;
